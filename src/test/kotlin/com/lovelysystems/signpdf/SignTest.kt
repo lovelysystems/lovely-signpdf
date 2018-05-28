@@ -1,6 +1,7 @@
 package com.lovelysystems.signpdf
 
 import org.junit.Test
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 class SignTest {
@@ -15,8 +16,8 @@ class SignTest {
         val keyStore = javaClass.getResourceAsStream("/com/lovelysystems/signpdf/samplekeystore.p12")
         val signer = Sign(keyStore, "sample".toCharArray())
         val content = javaClass.getResourceAsStream("/com/lovelysystems/signpdf/simple.pdf")
-        val f = File("/Users/bd/tmp/signed.pdf")
-        signer.sign(content, f.outputStream())
-        checkSignature(f.readBytes())
+        val output = ByteArrayOutputStream()
+        signer.sign(content, output)
+        checkSignature(output.toByteArray())
     }
 }
