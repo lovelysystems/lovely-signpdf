@@ -9,6 +9,10 @@ plugins {
 lovely {
     gitProject()
     dockerProject("lovelysystems/signpdf")
+    with(dockerFiles) {
+        from(tasks["distTar"].outputs)
+        from("docker/Dockerfile")
+    }
 }
 
 group = "com.lovelysystems"
@@ -20,7 +24,6 @@ application {
 repositories {
     jcenter()
     mavenCentral()
-    // maven { url{"https://dl.bintray.com/kotlin/ktor"} }
     maven {
         setUrl("https://dl.bintray.com/kotlin/ktor")
     }
@@ -37,7 +40,7 @@ dependencies {
     compile("org.bouncycastle:bcmail-jdk15on:1.59")
     compile("io.ktor:ktor-server-core:$ktorVersion")
     compile("io.ktor:ktor-server-netty:$ktorVersion")
-    compile("org.slf4j:slf4j-simple:1.7.25")
+    compile("ch.qos.logback:logback-classic:1.2.1")
     testCompile("org.amshove.kluent:kluent:1.32")
     testCompile("junit:junit:4.12")
     testCompile("io.ktor:ktor-server-test-host:$ktorVersion")

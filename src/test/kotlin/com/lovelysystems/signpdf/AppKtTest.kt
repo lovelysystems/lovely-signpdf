@@ -26,16 +26,19 @@ class AppKtTest {
                 HttpHeaders.ContentType,
                 ContentType.MultiPart.FormData.withParameter("boundary", boundary).toString()
             )
-            setBody(boundary, listOf(
-                PartData.FileItem({ javaClass.getResourceAsStream("/com/lovelysystems/signpdf/simple.pdf") }, {}, headersOf(
-                    HttpHeaders.ContentDisposition,
-                    ContentDisposition.File
-                        .withParameter(ContentDisposition.Parameters.Name, "file")
-                        .withParameter(ContentDisposition.Parameters.FileName, "file.txt")
-                        .toString()
+            setBody(
+                boundary, listOf(
+                    PartData.FileItem({ javaClass.getResourceAsStream("/com/lovelysystems/signpdf/simple.pdf") },
+                        {},
+                        headersOf(
+                            HttpHeaders.ContentDisposition,
+                            ContentDisposition.File
+                                .withParameter(ContentDisposition.Parameters.Name, "file")
+                                .withParameter(ContentDisposition.Parameters.FileName, "simple.pdf")
+                                .toString()
+                        )
+                    )
                 )
-                )
-            )
             )
         }.apply {
             response.status()?.value shouldEqual 200
@@ -47,11 +50,15 @@ class AppKtTest {
     private fun testApp(callback: TestApplicationEngine.() -> Unit) {
         withTestApplication({
             (environment.config as MapApplicationConfig).apply {
-                put("signer.keyStorePath", javaClass.getResource("/com/lovelysystems/signpdf/samplekeystore.p12").path)
-                put("signer.keyStorePass", "sample")
+                put("signer.keyStorePath", samplePath("samplekeystore.p12"))
+                put("signer.keyStorePassPath", samplePath("samplekeystorepass.txt"))
             }
             main()
         }, callback)
+    }
+
+    private fun samplePath(name: String): String {
+        return javaClass.getResource("/com/lovelysystems/signpdf/$name").path!!
     }
 }
 

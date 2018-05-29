@@ -25,12 +25,15 @@ class PDFContent(private val bytes: ByteArray) : OutgoingContent.ByteArrayConten
 }
 
 fun Application.main() {
+
+    // pdfbox optimization: To get higher rendering speed on JDK8 or later
+    System.setProperty("sun.java2d.cmm", "sun.java2d.cmm.kcms.KcmsServiceProvider")
     install(DefaultHeaders)
     install(CallLogging)
-
     val config = environment.config.config("signer")
     val keyStorePath = config.property("keyStorePath").getString()
-    val keyStorePass = config.property("keyStorePass").getString().toCharArray()
+
+    val keyStorePass = File(config.property("keyStorePassPath").getString()).readLines().first().toCharArray()
     val keyStoreStream = File(keyStorePath).inputStream()
 
     val signer = Sign(keyStoreStream, keyStorePass)
@@ -42,7 +45,6 @@ fun Application.main() {
                 call.respond(HttpStatusCode.BadRequest.description("Not a multipart request"))
             } else {
                 val multipart = call.receiveMultipart()
-
                 multipart.forEachPart { part ->
                     if (part is PartData.FileItem) {
                         val output = ByteArrayOutputStream()
