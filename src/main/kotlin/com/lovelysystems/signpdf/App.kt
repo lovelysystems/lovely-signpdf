@@ -17,6 +17,7 @@ import io.ktor.routing.post
 import io.ktor.routing.routing
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.InputStream
 
 class PDFContent(private val bytes: ByteArray) : OutgoingContent.ByteArrayContent() {
     override fun bytes(): ByteArray = bytes
@@ -40,19 +41,59 @@ fun Application.main() {
 
     routing {
         post("/sign") {
-            //val multipart = call.receiveMultipart()
             if (!call.request.isMultipart()) {
                 call.respond(HttpStatusCode.BadRequest.description("Not a multipart request"))
             } else {
                 val multipart = call.receiveMultipart()
+                var name: String? = null
+                var location: String? = null
+                var reason: String? = null
+                var contactInfo: String? = null
+                var fileStream: InputStream? = null
+
+                val failures = arrayListOf<String>()
+
                 multipart.forEachPart { part ->
-                    if (part is PartData.FileItem) {
-                        val output = ByteArrayOutputStream()
-                        part.streamProvider().use {
-                            signer.sign(it, output)
-                        }
-                        call.respond(PDFContent(output.toByteArray()))
+                    when (part) {
+                        is PartData.FormItem ->
+                            when (part.name) {
+                                "name" -> name = part.value
+                                "location" -> location = part.value
+                                "reason" -> reason = part.value
+                                "contactInfo" -> contactInfo = part.value
+                                else -> failures.add("Unknown form field ${part.name}")
+                            }
+                        is PartData.FileItem ->
+                            if (part.name == "file") {
+                                part.streamProvider().use {
+                                    fileStream = it
+                                }
+                            } else {
+                                failures.add("Unknown file field ${part.name}")
+                            }
                     }
+
+                }
+                if (fileStream == null) {
+                    failures.add("file field is not defined")
+                }
+                if (!failures.isEmpty()) {
+                    call.respond(HttpStatusCode.BadRequest, failures.joinToString("\n"))
+                } else {
+                    val output = ByteArrayOutputStream()
+                    fileStream.use {
+                        if (it != null) {
+                            signer.sign(
+                                it,
+                                output,
+                                name = name,
+                                location = location,
+                                reason = reason,
+                                contactInfo = contactInfo
+                            )
+                        }
+                    }
+                    call.respond(PDFContent(output.toByteArray()))
                 }
             }
         }

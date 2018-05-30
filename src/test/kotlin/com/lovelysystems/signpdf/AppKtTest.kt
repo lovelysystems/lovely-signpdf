@@ -18,32 +18,40 @@ class AppKtTest {
     }
 
     @Test
-    fun testSign() = testApp {
-        handleRequest(HttpMethod.Post, "/sign") {
-            val boundary = "***bbb***"
+    fun testInvalidCall() = testApp {
+        sign(
+            listOf(
+                formItem("invalid", "John Doe"),
+                formItem("location", "Dornbirn"),
+                fileItem("myfile", "/com/lovelysystems/signpdf/simple.pdf", "simple.pdf")
+            )
+        ).apply {
+            response.status()!!.value shouldEqual 400
+            response.content shouldEqual """
+                    Unknown form field invalid
+                    Unknown file field myfile
+                    file field is not defined""".trimIndent()
+        }
+    }
 
-            addHeader(
-                HttpHeaders.ContentType,
-                ContentType.MultiPart.FormData.withParameter("boundary", boundary).toString()
+    @Test
+    fun testSign() = testApp {
+        sign(
+            listOf(
+                fileItem("file", "/com/lovelysystems/signpdf/simple.pdf", "simple.pdf"),
+                formItem("name", "John Doe"),
+                formItem("location", "Dornbirn"),
+                formItem("reason", "My Stuff"),
+                formItem("contactInfo", "Hintere Achmühlerstraße 1a")
             )
-            setBody(
-                boundary, listOf(
-                    PartData.FileItem({ javaClass.getResourceAsStream("/com/lovelysystems/signpdf/simple.pdf") },
-                        {},
-                        headersOf(
-                            HttpHeaders.ContentDisposition,
-                            ContentDisposition.File
-                                .withParameter(ContentDisposition.Parameters.Name, "file")
-                                .withParameter(ContentDisposition.Parameters.FileName, "simple.pdf")
-                                .toString()
-                        )
-                    )
-                )
-            )
-        }.apply {
+        ).apply {
             response.status()?.value shouldEqual 200
             response.contentType().toString() shouldEqual "application/pdf"
-            checkSignature(response.byteContent!!)
+            val sig = validateAndGetFirstSignature(response.byteContent!!)
+            sig.name shouldEqual "John Doe"
+            sig.location shouldEqual "Dornbirn"
+            sig.reason shouldEqual "My Stuff"
+            sig.contactInfo shouldEqual "Hintere Achmühlerstraße 1a"
         }
     }
 
@@ -62,3 +70,37 @@ class AppKtTest {
     }
 }
 
+fun TestApplicationEngine.sign(formItems: List<PartData>, setup: TestApplicationRequest.() -> Unit = {})
+        : TestApplicationCall = handleRequest(HttpMethod.Post, "/sign") {
+    val boundary = "***bbb***"
+    addHeader(
+        HttpHeaders.ContentType,
+        ContentType.MultiPart.FormData.withParameter("boundary", boundary).toString()
+    )
+    setBody(boundary, formItems)
+    setup(this)
+}
+
+fun formItem(name: String, value: String): PartData.FormItem {
+    return PartData.FormItem(
+        value, { }, headersOf(
+            HttpHeaders.ContentDisposition,
+            ContentDisposition.Inline
+                .withParameter(ContentDisposition.Parameters.Name, name)
+                .toString()
+        )
+    )
+}
+
+fun TestApplicationEngine.fileItem(name: String, filePath: String, fileName: String) =
+    PartData.FileItem(
+        { javaClass.getResourceAsStream(filePath) },
+        {},
+        headersOf(
+            HttpHeaders.ContentDisposition,
+            ContentDisposition.File
+                .withParameter(ContentDisposition.Parameters.Name, name)
+                .withParameter(ContentDisposition.Parameters.FileName, fileName)
+                .toString()
+        )
+    )
