@@ -2,7 +2,9 @@
 Changes for lovely-signpdf
 ==========================
 
-unreleased
-==========
 
- - TBD
+2018/05/30 0.0.1
+================
+
+ - initial release
+

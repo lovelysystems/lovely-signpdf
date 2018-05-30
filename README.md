@@ -8,7 +8,7 @@ currently in alpha state and might change in incompatible ways.
 
 ## Usage
 
-Take a look at the exampole [curl command](./docker/sign.sh) on how to sign a document. Also the
+Take a look at the example [curl command](./docker/sign.sh) on how to sign a document. Also the
 [App test](./src/test/kotlin/com/lovelysystems/signpdf/AppKtTest.kt) might be interesting.
 
 ## Installation
