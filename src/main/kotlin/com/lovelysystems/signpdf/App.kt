@@ -17,7 +17,6 @@ import io.ktor.routing.post
 import io.ktor.routing.routing
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.InputStream
 
 class PDFContent(private val bytes: ByteArray) : OutgoingContent.ByteArrayContent() {
     override fun bytes(): ByteArray = bytes
@@ -49,7 +48,7 @@ fun Application.main() {
                 var location: String? = null
                 var reason: String? = null
                 var contactInfo: String? = null
-                var fileStream: InputStream? = null
+                var content: ByteArray? = null
 
                 val failures = arrayListOf<String>()
 
@@ -66,7 +65,7 @@ fun Application.main() {
                         is PartData.FileItem ->
                             if (part.name == "file") {
                                 part.streamProvider().use {
-                                    fileStream = it
+                                    content = it.readBytes()
                                 }
                             } else {
                                 failures.add("Unknown file field ${part.name}")
@@ -74,28 +73,25 @@ fun Application.main() {
                     }
 
                 }
-                if (fileStream == null) {
+                if (content == null) {
                     failures.add("file field is not defined")
                 }
                 if (!failures.isEmpty()) {
                     call.respond(HttpStatusCode.BadRequest, failures.joinToString("\n"))
                 } else {
                     val output = ByteArrayOutputStream()
-                    fileStream.use {
-                        if (it != null) {
-                            signer.sign(
-                                it,
-                                output,
-                                name = name,
-                                location = location,
-                                reason = reason,
-                                contactInfo = contactInfo
-                            )
-                        }
-                    }
+                    signer.sign(
+                        content!!.inputStream(),
+                        output,
+                        name = name,
+                        location = location,
+                        reason = reason,
+                        contactInfo = contactInfo
+                    )
                     call.respond(PDFContent(output.toByteArray()))
                 }
             }
         }
     }
 }
+

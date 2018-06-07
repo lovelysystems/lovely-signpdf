@@ -8,13 +8,18 @@ services:
   signpdf:
     image: lovelysystems/signpdf:dev
     ports:
-     - "18080:5678"
+     - "18080:8080"
     environment:
-      # optional environment variables set here for reference
+      # optional environment variable set here to their defaults for reference
       KEYSTORE_PASS_PATH: /run/secrets/signpdf-keystore-pass
       KEYSTORE_PATH: /run/secrets/signpdf-keystore
-      PORT: 5678
-    volumes:
-      # map the sample files used in tests as secrets
-      - ../src/test/resources/com/lovelysystems/signpdf/samplekeystore.p12:/run/secrets/signpdf-keystore
-      - ../src/test/resources/com/lovelysystems/signpdf/samplekeystorepass.txt:/run/secrets/signpdf-keystore-pass
+      PORT: 8080
+    secrets:
+     - signpdf-keystore
+     - signpdf-keystore-pass
+
+secrets:
+   signpdf-keystore:
+     file: ../src/test/resources/com/lovelysystems/signpdf/samplekeystore.p12
+   signpdf-keystore-pass:
+     file: ../src/test/resources/com/lovelysystems/signpdf/samplekeystorepass.txt
