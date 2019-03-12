@@ -1,3 +1,4 @@
+import org.gradle.internal.impldep.bsh.commands.dir
 import org.jetbrains.kotlin.gradle.dsl.Coroutines
 
 plugins {
@@ -41,6 +42,7 @@ dependencies {
     compile("io.ktor:ktor-server-core:$ktorVersion")
     compile("io.ktor:ktor-server-netty:$ktorVersion")
     compile("ch.qos.logback:logback-classic:1.2.1")
+    compile(fileTree("lib").include("*.jar"))
     testCompile("org.amshove.kluent:kluent:1.32")
     testCompile("junit:junit:4.12")
     testCompile("io.ktor:ktor-server-test-host:$ktorVersion")

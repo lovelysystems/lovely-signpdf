@@ -38,7 +38,7 @@ class AppKtTest {
     fun testSign() = testApp {
         sign(
             listOf(
-                fileItem("file", "/com/lovelysystems/signpdf/bug.pdf", "bug.pdf"),
+                fileItem("file", "/com/lovelysystems/signpdf/bug.pdf", "simple.pdf"),
                 formItem("name", "John Doe"),
                 formItem("location", "Dornbirn"),
                 formItem("reason", "My Stuff"),
