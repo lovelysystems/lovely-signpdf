@@ -42,7 +42,7 @@ dependencies {
     compile("io.ktor:ktor-server-core:$ktorVersion")
     compile("io.ktor:ktor-server-netty:$ktorVersion")
     compile("ch.qos.logback:logback-classic:1.2.1")
-    compile(fileTree("lib").include("*.jar"))
+    compile("com.google.guava:guava:27.1-jre")
     testCompile("org.amshove.kluent:kluent:1.32")
     testCompile("junit:junit:4.12")
     testCompile("io.ktor:ktor-server-test-host:$ktorVersion")

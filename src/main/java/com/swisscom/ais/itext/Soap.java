@@ -54,13 +54,14 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.bouncycastle.util.encoders.Base64;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.itextpdf.text.pdf.codec.Base64;
 import com.swisscom.ais.itext.Include.RequestType;
+import com.lovelysystems.signpdf.PDF;
 
 public class Soap {
 
@@ -203,7 +204,7 @@ public class Soap {
             claimedIdentity = claimedIdentity.concat(":" + properties.getProperty(claimedIdentityPropName));
         }
 
-        PDF pdf = new PDF(input, output, signingName, signingReason, signingLocation, signingContact, certificationLevel);
+        com.lovelysystems.signpdf.PDF pdf = new com.lovelysystems.signpdf.PDF(input, output, signingName, signingReason, signingLocation, signingContact, certificationLevel);
 
         try {
             String requestId = getRequestId();
@@ -782,7 +783,7 @@ public class Soap {
             digestMethodElement.addAttribute(new QName("Algorithm"), digestMethodAlgorithmURL);
             digestValueElement = documentHashElement.addChildElement("DigestValue", "dsig");
 
-            String s = com.itextpdf.text.pdf.codec.Base64.encodeBytes(hashList[i], Base64.DONT_BREAK_LINES);
+            String s = new String(Base64.encode(hashList[i]));
             digestValueElement.addTextNode(s);
         }
 
