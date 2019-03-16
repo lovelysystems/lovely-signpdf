@@ -82,7 +82,7 @@ fun Application.main() {
                     call.respond(HttpStatusCode.BadRequest, failures.joinToString("\n"))
                 } else {
                     val output = ByteArrayOutputStream()
-                    val soap = Soap(false, false, "/home/joba/lovely/lovely-signpdf/signpdf.properties");
+                    val soap = Soap(true, true, "/home/joba/lovely/lovely-signpdf/signpdf.properties");
                     soap.sign(Include.Signature.STATIC, content!!.inputStream(), output, name, reason, location, contactInfo, 1, null, null, null, null, null);
                     call.respond(PDFContent(output.toByteArray()))
                 }
