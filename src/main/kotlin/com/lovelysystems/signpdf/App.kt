@@ -33,12 +33,7 @@ fun Application.main() {
     install(DefaultHeaders)
     install(CallLogging)
     val config = environment.config.config("signer")
-    val keyStorePath = config.property("keyStorePath").getString()
-
-    val keyStorePass = File(config.property("keyStorePassPath").getString()).readLines().first().toCharArray()
-    val keyStoreStream = File(keyStorePath).inputStream()
-
-    val signer = Sign(keyStoreStream, keyStorePass)
+    val signer = getSigner(config)
 
     routing {
         post("/sign") {
@@ -82,8 +77,8 @@ fun Application.main() {
                     call.respond(HttpStatusCode.BadRequest, failures.joinToString("\n"))
                 } else {
                     val output = ByteArrayOutputStream()
-                    val soap = Soap(true, true, "/home/joba/lovely/lovely-signpdf/signpdf.properties");
-                    soap.sign(Include.Signature.STATIC, content!!.inputStream(), output, name, reason, location, contactInfo, 1, null, null, null, null, null);
+                    val pdf = PDF(content!!.inputStream(), output, name!!, reason!!, location!!, contactInfo!!);
+                    pdf.sign(signer)
                     call.respond(PDFContent(output.toByteArray()))
                 }
             }

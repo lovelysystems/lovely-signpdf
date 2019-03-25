@@ -9,7 +9,7 @@ import java.io.OutputStream
 import java.security.MessageDigest
 import java.util.*
 
-class PDF(inputStream: InputStream, outputStream: OutputStream, signName: String, signReason: String, signLocation: String, signContact: String, certificationLevel: Int) {
+class PDF(inputStream: InputStream, outputStream: OutputStream, signName: String = "", signReason: String = "", signLocation: String = "", signContact: String = "", certificationLevel: Int = 1) {
 
     private val document = PDDocument.load(inputStream)
 
@@ -55,6 +55,35 @@ class PDF(inputStream: InputStream, outputStream: OutputStream, signName: String
     }
 
     fun createSignedPdf(externalSignature: ByteArray, estimatedSize: Int) {
+        externalSigningSupport!!.setSignature(externalSignature)
+    }
+
+    fun sign(signer: Signer) {
+        val signature = PDSignature()
+        signature.setFilter(PDSignature.FILTER_ADOBE_PPKLITE)
+        signature.setSubFilter(PDSignature.SUBFILTER_ADBE_PKCS7_DETACHED)
+        signature.name = signName
+        signature.location = signLocation
+        signature.reason = signReason
+        signature.contactInfo = signContact
+        signature.signDate = Calendar.getInstance()
+
+        val signatureOptions = SignatureOptions()
+        // Size can vary, but should be enough for purpose.
+        signatureOptions.preferredSignatureSize = SignatureOptions.DEFAULT_SIGNATURE_SIZE * 2
+        // register signature dictionary and sign interface
+        document.addSignature(signature, signatureOptions)
+        val externalSigningSupport = document.saveIncrementalForExternalSigning(outputStream)
+        val stream = externalSigningSupport!!.content
+
+        val messageDigest = MessageDigest.getInstance("SHA-256")
+        var i = stream.read()
+        while(i != -1) {
+            messageDigest.update(i.toByte())
+            i = stream.read()
+        }
+        val externalSignature = signer.sign(messageDigest.digest())
+
         externalSigningSupport!!.setSignature(externalSignature)
     }
 

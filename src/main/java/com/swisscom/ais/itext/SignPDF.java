@@ -156,7 +156,7 @@ public class SignPDF {
         if (propertyFilePath == null) 
         	System.err.println("Property File not found. Add '-config=VALUE'-parameter with correct path");
         
-        Soap dss_soap = new Soap(verboseMode, debugMode, propertyFilePath);
+        Soap dss_soap = new Soap(verboseMode, debugMode, propertyFilePath, null, null);
         dss_soap.sign(signature, pdfToSign, signedPDF, null, signingReason, signingLocation, signingContact, certificationLevel, distinguishedName, msisdn, msg, language, serialnumber);
     }
     
