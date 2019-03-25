@@ -65,6 +65,8 @@ import com.lovelysystems.signpdf.PDF;
 
 public class Soap {
 
+    private InputStream keyStoreContent;
+    private char[] keyStorePassword;
     /**
      * Constant for timestamp urn
      */
@@ -129,7 +131,9 @@ public class Soap {
      * @param propertyFilePath Path of property file
      * @throws FileNotFoundException If a file do not exist. E.g. property file, certificate, input pdf etc
      */
-    public Soap(boolean verboseOutput, boolean debugMode, @Nullable String propertyFilePath) throws FileNotFoundException {
+    public Soap(boolean verboseOutput, boolean debugMode, @Nullable String propertyFilePath, InputStream keyStoreContent, char[] password) throws FileNotFoundException {
+        this.keyStoreContent = keyStoreContent;
+        this.keyStorePassword = password;
 
         Soap._verboseMode = verboseOutput;
         Soap._debugMode = debugMode;
@@ -963,7 +967,7 @@ public class Soap {
     @Nullable
     private String sendRequest(@Nonnull SOAPMessage soapMsg, @Nonnull String urlPath) throws Exception {
 
-        URLConnection conn = new Connect(urlPath, _privateKeyName, _serverCertPath, _clientCertPath, _timeout, _debugMode).getConnection();
+        URLConnection conn = new com.lovelysystems.signpdf.SwisscomConnector(urlPath, keyStoreContent, keyStorePassword, 90).getConnection();
         if (conn instanceof HttpsURLConnection) {
             ((HttpsURLConnection) conn).setRequestMethod("POST");
         }
