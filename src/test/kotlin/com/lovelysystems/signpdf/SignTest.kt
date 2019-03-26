@@ -1,5 +1,6 @@
 package com.lovelysystems.signpdf
 
+import com.lovelysystems.signpdf.signer.SelfSignedSigner
 import org.amshove.kluent.shouldEqual
 import org.junit.Test
 import java.io.ByteArrayOutputStream
@@ -14,16 +15,17 @@ class SignTest {
         // Note that for some reason DSA keys wont work, so ensure that you use RSA
 
         val keyStore = javaClass.getResourceAsStream("/com/lovelysystems/signpdf/samplekeystore.p12")
-        val signer = Sign(keyStore, "sample".toCharArray())
+        val signer = SelfSignedSigner(keyStore, "sample".toCharArray())
         val content = javaClass.getResourceAsStream("/com/lovelysystems/signpdf/simple.pdf")
         val output = ByteArrayOutputStream()
-        signer.sign(
+        val pdf = PDF(
             content, output,
-            name = "Max Mustermann",
-            location = "Dornbirn",
-            reason = "Just testing",
-            contactInfo = "Around the corner"
+            signName = "Max Mustermann",
+            signLocation = "Dornbirn",
+            signReason = "Just testing",
+            signContact = "Around the corner"
         )
+        pdf.sign(signer)
         val sig = validateAndGetFirstSignature(output.toByteArray())
 
         sig.name shouldEqual "Max Mustermann"

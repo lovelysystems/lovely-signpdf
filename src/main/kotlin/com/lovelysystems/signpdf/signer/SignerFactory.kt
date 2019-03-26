@@ -1,5 +1,8 @@
-package com.lovelysystems.signpdf
+package com.lovelysystems.signpdf.signer
 
+import com.lovelysystems.signpdf.signer.swisscom.Soap
+import com.lovelysystems.signpdf.signer.swisscom.SwisscomConnector
+import com.lovelysystems.signpdf.signer.swisscom.SwisscomSigner
 import io.ktor.config.ApplicationConfig
 import java.io.File
 
@@ -28,5 +31,8 @@ private fun createSwisscomSigner(config: ApplicationConfig): Signer {
 }
 
 private fun createSelfSignedSigner(config: ApplicationConfig): Signer {
-    return SelfSignedSigner()
+    val keyStorePath = config.property("keyStorePath").getString()
+    val keyStorePass = File(config.property("keyStorePassPath").getString()).readLines().first().toCharArray()
+    val keyStoreStream = File(keyStorePath).inputStream()
+    return SelfSignedSigner(keyStoreStream, keyStorePass)
 }

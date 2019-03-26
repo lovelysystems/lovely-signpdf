@@ -1,4 +1,4 @@
-package com.lovelysystems.signpdf
+package com.lovelysystems.signpdf.signer.swisscom
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.io.InputStream
@@ -30,9 +30,9 @@ class SwisscomConnector(url: String, keyStoreContent: InputStream, password: Cha
     init {
         val keystore = KeyStore.getInstance("JKS")
         keystore.load(keyStoreContent, password)
-        serverCert = keystore.getCertificate("aisca")
-        clientCert = keystore.getCertificate("lovely")
-        privateKey = keystore.getKey("lovely", password) as PrivateKey
+        serverCert = keystore.getCertificate("ais_server")
+        clientCert = keystore.getCertificate("ais_client")
+        privateKey = keystore.getKey("ais_client", password) as PrivateKey
         Security.addProvider(BouncyCastleProvider())
     }
 
@@ -105,7 +105,7 @@ class SwisscomConnector(url: String, keyStoreContent: InputStream, password: Cha
         val url = URL(url)
         val connection = url.openConnection()
         if (connection is HttpsURLConnection)
-            (connection as HttpsURLConnection).sslSocketFactory = sslFactory
+            connection.sslSocketFactory = sslFactory
 
         connection.connectTimeout = timeout
         return connection

@@ -58,6 +58,7 @@ class AppKtTest {
     private fun testApp(callback: TestApplicationEngine.() -> Unit) {
         withTestApplication({
             (environment.config as MapApplicationConfig).apply {
+                put("signer.type", "seflsigned")
                 put("signer.keyStorePath", samplePath("samplekeystore.p12"))
                 put("signer.keyStorePassPath", samplePath("samplekeystorepass.txt"))
             }

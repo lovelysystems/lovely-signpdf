@@ -1,7 +1,6 @@
 package com.lovelysystems.signpdf
 
-import com.swisscom.ais.itext.Include
-import com.swisscom.ais.itext.Soap
+import com.lovelysystems.signpdf.signer.getSigner
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -18,7 +17,6 @@ import io.ktor.response.respond
 import io.ktor.routing.post
 import io.ktor.routing.routing
 import java.io.ByteArrayOutputStream
-import java.io.File
 
 class PDFContent(private val bytes: ByteArray) : OutgoingContent.ByteArrayContent() {
     override fun bytes(): ByteArray = bytes
@@ -79,6 +77,7 @@ fun Application.main() {
                     val output = ByteArrayOutputStream()
                     val pdf = PDF(content!!.inputStream(), output, name!!, reason!!, location!!, contactInfo!!);
                     pdf.sign(signer)
+                    pdf.close()
                     call.respond(PDFContent(output.toByteArray()))
                 }
             }
