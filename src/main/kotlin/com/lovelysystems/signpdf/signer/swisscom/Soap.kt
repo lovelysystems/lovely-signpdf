@@ -1,9 +1,8 @@
-package com.lovelysystems.signpdf
+package com.lovelysystems.signpdf.signer.swisscom
 
 import org.bouncycastle.util.encoders.Base64
 import org.w3c.dom.Element
 import java.io.*
-import java.net.URLConnection
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
@@ -29,10 +28,10 @@ class Soap(claimIdentity: String, connector: SwisscomConnector) {
         val soapMessage = createRequestMessage(documentHash)
         val response = sendRequest(soapMessage)
         val responseResult = getTextFromXmlText(response, "ResultMajor")
-        val singingSuccess = response != null && responseResult != null && requestResultSuccess.equals(responseResult.get(0));
+        val singingSuccess = responseResult != null && requestResultSuccess.equals(responseResult.get(0))
 
         if (!singingSuccess) {
-            throw Exception();
+            throw Exception()
         }
 
         return Base64.decode(getTextFromXmlText(response, "Base64Signature")?.get(0))
@@ -101,7 +100,7 @@ class Soap(claimIdentity: String, connector: SwisscomConnector) {
     private fun sendRequest(soapMsg: SOAPMessage): String {
         val conn = connector.getConnection()!!
         if (conn is HttpsURLConnection) {
-            (conn as HttpsURLConnection).requestMethod = "POST"
+            conn.requestMethod = "POST"
         }
 
         conn.allowUserInteraction = true
@@ -117,7 +116,7 @@ class Soap(claimIdentity: String, connector: SwisscomConnector) {
         out.write(msg)
         out.flush()
 
-        out?.close()
+        out.close()
 
         val ir = BufferedReader(InputStreamReader(conn.getInputStream()))
 
@@ -128,7 +127,7 @@ class Soap(claimIdentity: String, connector: SwisscomConnector) {
             line = ir.readLine()
         }
 
-        ir?.close()
+        ir.close()
 
         return response
 

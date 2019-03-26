@@ -1,10 +1,6 @@
-package com.lovelysystems.signpdf
+package com.lovelysystems.signpdf.signer
 
 import org.apache.pdfbox.io.IOUtils
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature
-import org.apache.pdfbox.pdmodel.interactive.digitalsignature.SignatureInterface
-import org.apache.pdfbox.pdmodel.interactive.digitalsignature.SignatureOptions
 import org.bouncycastle.asn1.ASN1ObjectIdentifier
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers
 import org.bouncycastle.cert.X509CertificateHolder
@@ -20,10 +16,8 @@ import java.security.Key
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.cert.Certificate
-import java.util.*
 
-class Sign(keyStoreContent: InputStream, password: CharArray) {
-
+class SelfSignedSigner(keyStoreContent: InputStream, password: CharArray): Signer {
     private val privateKey: Key
 
     private val certChain: Array<out Certificate>
@@ -50,56 +44,18 @@ class Sign(keyStoreContent: InputStream, password: CharArray) {
         val cert = org.bouncycastle.asn1.x509.Certificate.getInstance(certChain[0].getEncoded())
         val sha1Signer = JcaContentSignerBuilder("SHA256WithRSA").build(privateKey)
         gen.addSignerInfoGenerator(
-            JcaSignerInfoGeneratorBuilder(JcaDigestCalculatorProviderBuilder().build()).build(
-                sha1Signer,
-                X509CertificateHolder(cert)
-            )
+                JcaSignerInfoGeneratorBuilder(JcaDigestCalculatorProviderBuilder().build()).build(
+                        sha1Signer,
+                        X509CertificateHolder(cert)
+                )
         )
         gen.addCertificates(certs)
     }
-
-    private val signatureInterface = SignatureInterface {
-        val msg = CMSProcessableInputStream(it)
-        val signedData = gen.generate(msg, false)
-        signedData.encoded
-    }
-
-    fun sign(
-        content: InputStream,
-        output: OutputStream,
-        name: String? = null,
-        location: String? = null,
-        reason: String? = null,
-        contactInfo: String? = null
-    ) {
-        // create signature dictionary
-
-        val document = PDDocument.load(content)
-
-        val signature = PDSignature()
-        signature.setFilter(PDSignature.FILTER_ADOBE_PPKLITE)
-        signature.setSubFilter(PDSignature.SUBFILTER_ADBE_PKCS7_DETACHED)
-        signature.name = name
-        signature.location = location
-        signature.reason = reason
-        signature.contactInfo = contactInfo
-
-        // the signing date, needed for valid signature
-        // TODO: ensure propper timezone
-        signature.signDate = Calendar.getInstance()
-
-        val signatureOptions = SignatureOptions()
-        // Size can vary, but should be enough for purpose.
-        signatureOptions.preferredSignatureSize = SignatureOptions.DEFAULT_SIGNATURE_SIZE * 2
-        // register signature dictionary and sign interface
-        document.addSignature(signature, signatureInterface, signatureOptions)
-
-        // write incremental (only for signing purpose)
-        document.saveIncremental(output)
-        document.close()
+    override fun sign(documentStream: InputStream): ByteArray? {
+        val cmsdata = CMSProcessableInputStream(documentStream)
+        return gen.generate(cmsdata, false).encoded
     }
 }
-
 /**
  * Wraps a InputStream into a CMSProcessable object for bouncy castle. It's a memory saving
  * alternative to the [CMSProcessableByteArray][org.bouncycastle.cms.CMSProcessableByteArray]
