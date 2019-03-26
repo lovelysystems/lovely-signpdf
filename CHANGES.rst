@@ -2,6 +2,11 @@
 Changes for lovely-signpdf
 ==========================
 
+unreleased
+==========
+
+- implement signer for swisscom and selfsigned
+
 2018/06/19 0.0.2
 ================
 
