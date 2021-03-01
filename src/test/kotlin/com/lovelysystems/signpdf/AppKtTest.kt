@@ -1,9 +1,20 @@
 package com.lovelysystems.signpdf
 
 import io.ktor.config.MapApplicationConfig
-import io.ktor.content.PartData
-import io.ktor.http.*
-import io.ktor.server.testing.*
+import io.ktor.http.ContentDisposition
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.http.content.PartData
+import io.ktor.http.headersOf
+import io.ktor.server.testing.TestApplicationCall
+import io.ktor.server.testing.TestApplicationEngine
+import io.ktor.server.testing.TestApplicationRequest
+import io.ktor.server.testing.contentType
+import io.ktor.server.testing.handleRequest
+import io.ktor.server.testing.setBody
+import io.ktor.server.testing.withTestApplication
+import io.ktor.utils.io.streams.asInput
 import org.amshove.kluent.shouldEqual
 import org.junit.Test
 
@@ -95,7 +106,7 @@ fun formItem(name: String, value: String): PartData.FormItem {
 
 fun TestApplicationEngine.fileItem(name: String, filePath: String, fileName: String) =
     PartData.FileItem(
-        { javaClass.getResourceAsStream(filePath) },
+        { javaClass.getResourceAsStream(filePath).asInput() },
         {},
         headersOf(
             HttpHeaders.ContentDisposition,

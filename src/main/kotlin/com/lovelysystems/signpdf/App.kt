@@ -4,13 +4,14 @@ import com.lovelysystems.signpdf.signer.getSigner
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
-import io.ktor.content.OutgoingContent
-import io.ktor.content.PartData
-import io.ktor.content.forEachPart
 import io.ktor.features.CallLogging
 import io.ktor.features.DefaultHeaders
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.OutgoingContent
+import io.ktor.http.content.PartData
+import io.ktor.http.content.forEachPart
+import io.ktor.http.content.streamProvider
 import io.ktor.request.isMultipart
 import io.ktor.request.receiveMultipart
 import io.ktor.response.respond

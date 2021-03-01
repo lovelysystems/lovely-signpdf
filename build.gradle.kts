@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.Coroutines
 
 plugins {
     application
-    kotlin("jvm") version "1.2.41"
-    id("com.lovelysystems.gradle") version ("1.2.0")
+    kotlin("jvm") version "1.4.31"
+    id("com.lovelysystems.gradle") version ("1.3.2")
 }
 
 lovely {
@@ -35,7 +35,7 @@ kotlin {
 }
 
 dependencies {
-    val ktorVersion = "0.9.2"
+    val ktorVersion = "1.5.2"
     compile(kotlin("stdlib-jdk8"))
     compile("org.apache.pdfbox:pdfbox:2.0.9")
     compile("org.bouncycastle:bcmail-jdk15on:1.59")
