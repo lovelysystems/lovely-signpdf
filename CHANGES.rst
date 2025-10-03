@@ -6,6 +6,7 @@ unreleased
 ==========
 
 - implement signer for swisscom and selfsigned
+- push docker image to github container registry instead of docker hub
 
 2018/06/19 0.0.2
 ================

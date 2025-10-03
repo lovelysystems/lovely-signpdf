@@ -9,7 +9,7 @@ plugins {
 
 lovely {
     gitProject()
-    dockerProject("lovelysystems/signpdf")
+    dockerProject("ghcr.io/lovelysystems/signpdf")
     with(dockerFiles) {
         from(tasks["distTar"].outputs)
         from("docker/Dockerfile")
