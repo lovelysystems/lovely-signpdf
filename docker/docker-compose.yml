@@ -6,7 +6,7 @@ version: '3.5'
 
 services:
   signpdf:
-    image: lovelysystems/signpdf:dev
+    image: ghcr.io/lovelysystems/signpdf:dev
     ports:
      - "18080:8080"
     environment:
